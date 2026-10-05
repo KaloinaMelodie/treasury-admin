@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: treasury_postgres
+    restart: always
+
+    environment:
+      POSTGRES_USER: treasury_user
+      POSTGRES_PASSWORD: treasury_password
+      POSTGRES_DB: treasury_db
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+volumes:
+  postgres_data:
