@@ -1,48 +1,23 @@
 const express = require("express");
 
-const controller =
-require("./category.controller");
-
+const controller = require("./category.controller");
 
 const router = express.Router();
 
-const validate =require("../../middleware/validate");
+const validate = require("../../middleware/validate");
 
+const { createCategoryValidation } = require("./category.validation");
 
-const {createCategoryValidation}=require("./category.validation");
+router.get("/", controller.getAll);
 
+router.get("/:id", controller.getOne);
 
-router.get(
-    "/",
-    controller.getAll
-);
+router.post("/", createCategoryValidation, validate, controller.create);
 
+router.put("/:id", controller.update);
 
-router.get(
-    "/:id",
-    controller.getOne
-);
+router.patch("/:id/status", controller.updateStatus);
 
-
-router.post(
-"/",
-createCategoryValidation,
-validate,
-controller.create
-);
-
-
-router.put(
-    "/:id",
-    controller.update
-);
-
-
-router.patch(
-    "/:id/status",
-    controller.updateStatus
-);
-
-
+router.delete("/:id", controller.remove);
 
 module.exports = router;

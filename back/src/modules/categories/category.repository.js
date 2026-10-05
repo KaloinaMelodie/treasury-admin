@@ -1,184 +1,103 @@
 const db = require("../../database/connection");
 
-
 async function findAll(filters = {}) {
-
-    let query = `
+  let query = `
         SELECT *
         FROM categories
         WHERE deleted_at IS NULL
     `;
 
-
-    let countQuery = `
+  let countQuery = `
         SELECT COUNT(*)
         FROM categories
         WHERE deleted_at IS NULL
     `;
 
+  const params = [];
+  const conditions = [];
 
-    const params = [];
-    const conditions = [];
+  if (filters.search) {
+    params.push(`%${filters.search}%`);
 
-
-
-    if(filters.search){
-
-        params.push(`%${filters.search}%`);
-
-        conditions.push(
-            `
+    conditions.push(
+      `
             (
                 name ILIKE $${params.length}
                 OR description ILIKE $${params.length}
             )
-            `
-        );
+            `,
+    );
+  }
 
-    }
+  if (filters.type) {
+    params.push(filters.type);
 
+    conditions.push(`type = $${params.length}`);
+  }
 
+  if (filters.is_active !== undefined) {
+    params.push(filters.is_active);
 
-    if(filters.type){
+    conditions.push(`is_active = $${params.length}`);
+  }
 
-        params.push(filters.type);
+  if (conditions.length) {
+    query += " AND " + conditions.join(" AND ");
 
-        conditions.push(
-            `type = $${params.length}`
-        );
+    countQuery += " AND " + conditions.join(" AND ");
+  }
 
-    }
+  const page = Number(filters.page) || 1;
 
+  const limit = Number(filters.limit) || 10;
 
+  const offset = (page - 1) * limit;
 
-    if(filters.is_active !== undefined){
+  const allowedSort = ["name", "type", "created_at"];
 
-        params.push(filters.is_active);
+  const sortBy = allowedSort.includes(filters.sortBy)
+    ? filters.sortBy
+    : "created_at";
 
-        conditions.push(
-            `is_active = $${params.length}`
-        );
+  const sortOrder = filters.sortOrder === "asc" ? "ASC" : "DESC";
 
-    }
-
-
-
-    if(conditions.length){
-
-        query +=
-            " AND " + conditions.join(" AND ");
-
-        countQuery +=
-            " AND " + conditions.join(" AND ");
-
-    }
-
-
-
-    const page =
-        Number(filters.page) || 1;
-
-
-    const limit =
-        Number(filters.limit) || 10;
-
-
-    const offset =
-        (page - 1) * limit;
-
-
-
-    const allowedSort = [
-        "name",
-        "type",
-        "created_at"
-    ];
-
-
-    const sortBy =
-        allowedSort.includes(filters.sortBy)
-        ?
-        filters.sortBy
-        :
-        "created_at";
-
-
-
-    const sortOrder =
-        filters.sortOrder === "asc"
-        ?
-        "ASC"
-        :
-        "DESC";
-
-
-
-    query += `
+  query += `
         ORDER BY ${sortBy} ${sortOrder}
         LIMIT $${params.length + 1}
         OFFSET $${params.length + 2}
     `;
 
+  params.push(limit);
+  params.push(offset);
 
-    params.push(limit);
-    params.push(offset);
+  const data = await db.query(query, params);
 
+  const count = await db.query(countQuery, params.slice(0, params.length - 2));
 
+  return {
+    rows: data.rows,
 
-    const data =
-        await db.query(
-            query,
-            params
-        );
-
-
-    const count =
-        await db.query(
-            countQuery,
-            params.slice(
-                0,
-                params.length - 2
-            )
-        );
-
-
-
-    return {
-
-        rows:data.rows,
-
-        total:Number(
-            count.rows[0].count
-        )
-
-    };
-
+    total: Number(count.rows[0].count),
+  };
 }
 
-
-
-async function findById(id){
-
-    const result = await db.query(
-        `
+async function findById(id) {
+  const result = await db.query(
+    `
         SELECT *
         FROM categories
         WHERE id = $1
         AND deleted_at IS NULL
         `,
-        [id]
-    );
+    [id],
+  );
 
-
-    return result.rows[0];
+  return result.rows[0];
 }
 
-
-
-async function create(data){
-
-    const result = await db.query(
-        `
+async function create(data) {
+  const result = await db.query(
+    `
         INSERT INTO categories
         (
             name,
@@ -193,23 +112,15 @@ async function create(data){
         )
         RETURNING *
         `,
-        [
-            data.name,
-            data.type,
-            data.description
-        ]
-    );
+    [data.name, data.type, data.description],
+  );
 
-
-    return result.rows[0];
+  return result.rows[0];
 }
 
-
-
-async function update(id,data){
-
-    const result = await db.query(
-        `
+async function update(id, data) {
+  const result = await db.query(
+    `
         UPDATE categories
 
         SET
@@ -222,24 +133,15 @@ async function update(id,data){
 
         RETURNING *
         `,
-        [
-            data.name,
-            data.type,
-            data.description,
-            id
-        ]
-    );
+    [data.name, data.type, data.description, id],
+  );
 
-
-    return result.rows[0];
+  return result.rows[0];
 }
 
-
-
-async function changeStatus(id,status){
-
-    const result = await db.query(
-        `
+async function changeStatus(id, status) {
+  const result = await db.query(
+    `
         UPDATE categories
 
         SET
@@ -250,23 +152,34 @@ async function changeStatus(id,status){
 
         RETURNING *
         `,
-        [
-            status,
-            id
-        ]
-    );
+    [status, id],
+  );
 
+  return result.rows[0];
+}
 
-    return result.rows[0];
+async function deleteCategory(id) {
+  const result = await db.query(
+    `
+        DELETE FROM categories
+
+        WHERE id=$1
+
+        RETURNING *
+        `,
+
+    [id],
+  );
+
+  return result.rows[0];
 }
 
 
 module.exports = {
-
-    findAll,
-    findById,
-    create,
-    update,
-    changeStatus
-
+  findAll,
+  findById,
+  create,
+  update,
+  changeStatus,
+  deleteCategory
 };
