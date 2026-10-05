@@ -86,3 +86,18 @@ npm init -y
 https://github.com/KaloinaMelodie/treasury-admin.git
 
 git remote set-url origin https://github.com/KaloinaMelodie/treasury-admin.git
+
+
+- Executer migration
+    - executer sur treasury-admin
+docker exec -i treasury_postgres psql -U treasury_user -d treasury_db < database/migrations/001_create_categories.sql
+
+
+
+?page=1
+&limit=10
+&search=coti
+&type=INCOME
+&is_active=true
+&sortBy=name
+&sortOrder=asc
