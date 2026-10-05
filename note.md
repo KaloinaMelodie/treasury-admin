@@ -101,8 +101,14 @@ git remote set-url origin https://github.com/KaloinaMelodie/treasury-admin.git
 - Executer migration
     - executer sur treasury-admin
 docker exec -i treasury_postgres psql -U treasury_user -d treasury_db < database/migrations/001_create_categories.sql
+dans powershell
+Get-Content database/migrations/*.sql | docker exec -i treasury_postgres psql -U treasury_user -d treasury_db
+Get-Content database/migrations/*.sql -Encoding UTF8 | docker exec -i treasury_postgres psql -U treasury_user -d treasury_db
 
+SET client_encoding TO 'UTF8';
 
+docker cp database/migrations treasury_postgres:/tmp/migrations
+docker exec treasury_postgres sh -c 'for file in /tmp/migrations/*.sql; do echo Running $file; psql -U treasury_user -d treasury_db -f "$file"; done'
 
 ?page=1
 &limit=10
