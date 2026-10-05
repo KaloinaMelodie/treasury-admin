@@ -82,3 +82,7 @@ npm install dotenv express
 npm install pg cors
 
 npm init -y
+
+https://github.com/KaloinaMelodie/treasury-admin.git
+
+git remote set-url origin https://github.com/KaloinaMelodie/treasury-admin.git
