@@ -11,7 +11,41 @@ const allowedTypes = [
 
 async function getCategories(filters){
 
-    return repository.findAll(filters);
+    const result =
+        await repository.findAll(filters);
+
+
+
+    const page =
+        Number(filters.page) || 1;
+
+
+    const limit =
+        Number(filters.limit) || 10;
+
+
+
+    return {
+
+        data: result.rows,
+
+
+        pagination:{
+
+            page,
+
+            limit,
+
+            total: result.total,
+
+            totalPages:
+                Math.ceil(
+                    result.total / limit
+                )
+
+        }
+
+    };
 
 }
 

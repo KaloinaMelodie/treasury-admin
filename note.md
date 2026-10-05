@@ -74,8 +74,18 @@ Git
 
 git init
 
+# Front
 npm create vite@latest front
 
+npm install react-router-dom
+
+npm install axios
+
+npm install @mui/material @emotion/react @emotion/styled
+
+npm install @mui/icons-material
+
+# Back
 npm install --save-dev nodemon
 
 npm install dotenv express 
@@ -83,7 +93,7 @@ npm install pg cors
 
 npm init -y
 
-https://github.com/KaloinaMelodie/treasury-admin.git
+npm install express-validator
 
 git remote set-url origin https://github.com/KaloinaMelodie/treasury-admin.git
 

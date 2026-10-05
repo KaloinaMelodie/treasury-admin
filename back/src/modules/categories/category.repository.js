@@ -9,37 +9,150 @@ async function findAll(filters = {}) {
         WHERE deleted_at IS NULL
     `;
 
+
+    let countQuery = `
+        SELECT COUNT(*)
+        FROM categories
+        WHERE deleted_at IS NULL
+    `;
+
+
     const params = [];
+    const conditions = [];
+
+
+
+    if(filters.search){
+
+        params.push(`%${filters.search}%`);
+
+        conditions.push(
+            `
+            (
+                name ILIKE $${params.length}
+                OR description ILIKE $${params.length}
+            )
+            `
+        );
+
+    }
+
 
 
     if(filters.type){
 
         params.push(filters.type);
 
-        query += `
-            AND type = $${params.length}
-        `;
+        conditions.push(
+            `type = $${params.length}`
+        );
+
     }
 
 
-    if(filters.isActive !== undefined){
 
-        params.push(filters.isActive);
+    if(filters.is_active !== undefined){
 
-        query += `
-            AND is_active = $${params.length}
-        `;
+        params.push(filters.is_active);
+
+        conditions.push(
+            `is_active = $${params.length}`
+        );
+
     }
+
+
+
+    if(conditions.length){
+
+        query +=
+            " AND " + conditions.join(" AND ");
+
+        countQuery +=
+            " AND " + conditions.join(" AND ");
+
+    }
+
+
+
+    const page =
+        Number(filters.page) || 1;
+
+
+    const limit =
+        Number(filters.limit) || 10;
+
+
+    const offset =
+        (page - 1) * limit;
+
+
+
+    const allowedSort = [
+        "name",
+        "type",
+        "created_at"
+    ];
+
+
+    const sortBy =
+        allowedSort.includes(filters.sortBy)
+        ?
+        filters.sortBy
+        :
+        "created_at";
+
+
+
+    const sortOrder =
+        filters.sortOrder === "asc"
+        ?
+        "ASC"
+        :
+        "DESC";
+
 
 
     query += `
-        ORDER BY created_at DESC
+        ORDER BY ${sortBy} ${sortOrder}
+        LIMIT $${params.length + 1}
+        OFFSET $${params.length + 2}
     `;
 
 
-    const result = await db.query(query, params);
+    params.push(limit);
+    params.push(offset);
 
-    return result.rows;
+
+
+    const data =
+        await db.query(
+            query,
+            params
+        );
+
+
+    const count =
+        await db.query(
+            countQuery,
+            params.slice(
+                0,
+                params.length - 2
+            )
+        );
+
+
+
+    return {
+
+        rows:data.rows,
+
+        total:Number(
+            count.rows[0].count
+        )
+
+    };
+
 }
 
 

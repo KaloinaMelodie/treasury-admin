@@ -1,6 +1,12 @@
 const express = require("express");
 const cors = require("cors");
 
+const categoryRoutes = require("./modules/categories/category.routes");
+
+const notFound =require("./middleware/notFound");
+
+
+const errorHandler =require("./middleware/errorHandler");
 
 const app = express();
 
@@ -8,15 +14,6 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
-
-const categoryRoutes = require("./modules/categories/category.routes");
-
-
-app.use(
-    "/api/categories",
-    categoryRoutes
-);
-
 
 app.get("/",(req,res)=>{
 
@@ -26,5 +23,14 @@ message:"Treasury API running"
 
 });
 
+app.use(
+    "/api/categories",
+    categoryRoutes
+);
+
+app.use(notFound);
+
+
+app.use(errorHandler);
 
 module.exports = app;

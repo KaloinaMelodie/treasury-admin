@@ -6,6 +6,10 @@ require("./category.controller");
 
 const router = express.Router();
 
+const validate =require("../../middleware/validate");
+
+
+const {createCategoryValidation}=require("./category.validation");
 
 
 router.get(
@@ -21,8 +25,10 @@ router.get(
 
 
 router.post(
-    "/",
-    controller.create
+"/",
+createCategoryValidation,
+validate,
+controller.create
 );
 
 
