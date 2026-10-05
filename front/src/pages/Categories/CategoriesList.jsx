@@ -8,7 +8,7 @@ import TableToolbar from "../../components/TableToolbar";
 import TablePagination from "../../components/TablePagination";
 import { createCategory, updateCategory } from "../../services/categoryService";
 import CategoryForm from "./CategoryForm";
-import { deleteCategory } from "../../services/categoryService";
+import { deleteCategory, updateCategoryStatus } from "../../services/categoryService";
 
 function CategoriesList() {
   const [categories, setCategories] = useState([]);
@@ -86,7 +86,7 @@ function CategoriesList() {
         type,
         is_active: status === "" ? undefined : status === status,
         sortBy,
-        sortOrder,
+        sortOrder,        
       });
 
       setCategories(result.data);
@@ -155,7 +155,7 @@ function CategoriesList() {
       console.error(error);
     }
   }
-  
+
   async function handleDelete(id) {
     const confirmDelete = window.confirm("Supprimer cette catégorie ?");
 
@@ -164,6 +164,7 @@ function CategoriesList() {
     }
 
     await deleteCategory(id);
+    // await updateCategoryStatus(id, false);
 
     loadCategories();
   }

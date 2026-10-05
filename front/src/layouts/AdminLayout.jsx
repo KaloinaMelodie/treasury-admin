@@ -2,9 +2,9 @@ import { Outlet } from "react-router-dom";
 
 import { Box } from "@mui/material";
 
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/layout/Sidebar";
 
-const drawerWidth = 240;
+import Topbar from "../components/layout/Topbar";
 
 function AdminLayout() {
   return (
@@ -20,18 +20,20 @@ function AdminLayout() {
         sx={{
           flexGrow: 1,
 
-          width: {
-            xs: "100%",
-            md: `calc(100% - ${drawerWidth}px)`,
-          },
+          minHeight: "100vh",
 
-          p: {
-            xs: 2,
-            md: 4,
-          },
+          background: "#f7f7f8",
         }}
       >
-        <Outlet />
+        <Topbar />
+
+        <Box
+          sx={{
+            p: 3,
+          }}
+        >
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   );
