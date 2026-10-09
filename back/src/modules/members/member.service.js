@@ -1,5 +1,6 @@
 const repository = require("./member.repository");
 const { beginTransaction } = require("../../database/transaction");
+mapMember = require("./member.mapper");
 
 async function getMembers(filters) {
   const result = await repository.findAll(filters);
@@ -9,58 +10,7 @@ async function getMembers(filters) {
   const limit = Number(filters.limit) || 10;
 
   return {
-    data: result.rows.map(member => ({
-
-    id: member.id,
-
-    first_name: member.first_name,
-
-    last_name: member.last_name,
-
-    phone: member.phone,
-
-    email: member.email,
-
-    entry_date: member.entry_date,
-
-    exit_date: member.exit_date,
-
-    user_id: member.user_id,
-
-    created_at: member.created_at,
-    created_by: member.created_by,
-    updated_at: member.updated_at,
-    updated_by: member.updated_by,
-    deleted_at: member.deleted_at,
-    deleted_by: member.deleted_by,
-
-    status_code: member.status_code,
-
-    status_label: member.status_label,
-
-
-    group_name: member.group_name,
-
-
-    subscription:
-        member.subscription_amount
-        ?
-        {
-
-            amount:
-            member.subscription_amount,
-
-            frequency:
-            member.subscription_frequency,
-
-            start_date:
-            member.subscription_start_date
-
-        }
-        :
-        null
-
-})),
+    data: result.rows.map((member) => mapMember(member)),
 
     pagination: {
       page,
@@ -81,58 +31,7 @@ async function getMember(id) {
     throw new Error("Member not found");
   }
 
-  return {
-
-    id: member.id,
-
-    first_name: member.first_name,
-
-    last_name: member.last_name,
-
-    phone: member.phone,
-
-    email: member.email,
-
-    entry_date: member.entry_date,
-
-    exit_date: member.exit_date,
-
-    user_id: member.user_id,
-
-    created_at: member.created_at,
-    created_by: member.created_by,
-    updated_at: member.updated_at,
-    updated_by: member.updated_by,
-    deleted_at: member.deleted_at,
-    deleted_by: member.deleted_by,
-
-    status_code: member.status_code,
-
-    status_label: member.status_label,
-
-
-    group_name: member.group_name,
-
-
-    subscription:
-        member.subscription_amount
-        ?
-        {
-
-            amount:
-            member.subscription_amount,
-
-            frequency:
-            member.subscription_frequency,
-
-            start_date:
-            member.subscription_start_date
-
-        }
-        :
-        null
-
-};
+  return mapMember(member);
 }
 
 async function createMember(data) {
@@ -169,7 +68,7 @@ async function createMember(data) {
 
     await client.query("COMMIT");
 
-    return member;
+    return await getMember(id);
   } catch (error) {
     await client.query("ROLLBACK");
 
@@ -182,17 +81,16 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString("en-CA");
 };
 
-
 async function updateMemberSubscription(client, memberId, subscription) {
   const current = await repository.findActiveSubscription(client, memberId);
-  
+
   if (!current) {
     return repository.createSubscription(client, {
       member_id: memberId,
       ...subscription,
     });
   }
-  
+
   //
   // Cas 1 : même période
   //
@@ -277,9 +175,63 @@ async function updateMember(id, data) {
   }
 }
 
+async function removeMember(id) {
+  const member = await repository.findById(id);
+
+  if (!member) {
+    throw new Error("Member not found");
+  }
+
+  return repository.deleteMember(id);
+}
+
+async function changeMemberStatus(id, statusCode) {
+  const client = await beginTransaction();
+
+  try {
+    const status = await repository.findStatusByCode(
+      client,
+
+      statusCode,
+    );
+
+    if (!status) {
+      throw new Error("Invalid member status");
+    }
+
+    let exitDate = null;
+
+    if (status.code === "EXITED") {
+      exitDate = new Date();
+    }
+
+    const member = await repository.updateStatus(
+      client,
+
+      id,
+
+      status.id,
+
+      exitDate,
+    );
+
+    await client.query("COMMIT");
+
+    return await getMember(id);
+  } catch (error) {
+    await client.query("ROLLBACK");
+
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 module.exports = {
   getMembers,
   getMember,
   createMember,
   updateMember,
+  removeMember,
+  changeMemberStatus,
 };

@@ -30,6 +30,8 @@ CREATE TABLE member_subscription (
 
         REFERENCES members(id)
 
+        ON DELETE CASCADE
+
 );
 
 

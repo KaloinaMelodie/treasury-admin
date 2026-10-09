@@ -532,6 +532,70 @@ RETURNING *
   return result.rows[0];
 }
 
+async function deleteMember(id) {
+  const result = await db.query(
+    `
+        DELETE FROM members
+
+        WHERE id=$1
+
+        RETURNING *
+        `,
+
+    [id],
+  );
+
+  return result.rows[0];
+}
+
+async function updateStatus(client, id, statusId, exitDate = null) {
+  const result = await client.query(
+    `
+
+UPDATE members
+
+SET
+
+status_id=$1,
+
+exit_date=$2,
+
+updated_at=CURRENT_TIMESTAMP
+
+
+WHERE id=$3
+
+
+RETURNING *
+
+`,
+
+    [statusId, exitDate, id],
+  );
+
+  return result.rows[0];
+}
+
+async function findStatusByCode(client, code) {
+  const result = await client.query(
+    `
+
+SELECT *
+
+FROM member_statuses
+
+WHERE code=$1
+
+AND is_active=true
+
+`,
+
+    [code],
+  );
+
+  return result.rows[0];
+}
+
 module.exports = {
   findAll,
   findById,
@@ -541,4 +605,7 @@ module.exports = {
   findActiveSubscription,
   closeSubscription,
   updateSubscription,
+  deleteMember,
+  updateStatus,
+  findStatusByCode
 };

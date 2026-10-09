@@ -43,9 +43,35 @@ async function update(req, res) {
   });
 }
 
+async function remove(req, res) {
+  const result = await service.removeMember(req.params.id);
+
+  res.json({
+    success: true,
+
+    data: result,
+  });
+}
+
+async function updateStatus(req, res) {
+  const result = await service.changeMemberStatus(
+    req.params.id,
+
+    req.body.status,
+  );
+
+  res.json({
+    success: true,
+
+    data: result,
+  });
+}
+
 module.exports = {
   getAll,
   getOne,
   create,
   update,
+  remove,
+  updateStatus,
 };

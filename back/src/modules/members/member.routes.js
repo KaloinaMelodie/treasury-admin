@@ -36,4 +36,12 @@ router.put(
   controller.update,
 );
 
+router.delete("/:id", controller.remove);
+
+router.patch(
+  "/:id/status",
+
+  controller.updateStatus,
+);
+
 module.exports = router;
