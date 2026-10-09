@@ -29,8 +29,23 @@ async function create(req, res) {
   });
 }
 
+async function update(req, res) {
+  const result = await service.updateMember(
+    req.params.id,
+
+    req.body,
+  );
+
+  res.json({
+    success: true,
+
+    data: result,
+  });
+}
+
 module.exports = {
   getAll,
   getOne,
   create,
+  update,
 };

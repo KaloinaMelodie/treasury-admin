@@ -5,26 +5,20 @@ async function findAll(filters = {}) {
 
 SELECT
 
-m.id,
-
-m.first_name,
-
-m.last_name,
-
-m.phone,
-
-m.email,
-
-m.entry_date,
-
+m.*,
 
 ms.code AS status_code,
 
 ms.label AS status_label,
 
 
-mg.name AS group_name
+mg.name AS group_name,
 
+msub.amount AS subscription_amount,
+
+msub.frequency AS subscription_frequency,
+
+msub.start_date AS subscription_start_date
 
 FROM members m
 
@@ -37,6 +31,12 @@ ON ms.id = m.status_id
 LEFT JOIN member_groups mg
 
 ON mg.id = m.group_id
+
+LEFT JOIN member_subscription msub
+
+ON msub.member_id = m.id
+
+AND msub.end_date IS NULL
 
 
 WHERE m.deleted_at IS NULL
@@ -138,11 +138,17 @@ m.group_id = $${params.length}
   // Tri
   //
 
-  const allowedSort = ["first_name", "last_name", "entry_date", "created_at"];
+  const allowedSort = {
+    first_name: "m.first_name",
 
-  const sortBy = allowedSort.includes(filters.sortBy)
-    ? filters.sortBy
-    : "created_at";
+    last_name: "m.last_name",
+
+    entry_date: "m.entry_date",
+
+    created_at: "m.created_at",
+  };
+
+  const sortBy = allowedSort[filters.sortBy] || "m.created_at";
 
   const sortOrder = filters.sortOrder === "asc" ? "ASC" : "DESC";
 
@@ -203,7 +209,13 @@ ms.code AS status_code,
 ms.label AS status_label,
 
 
-mg.name AS group_name
+mg.name AS group_name,
+
+msub.amount AS subscription_amount,
+
+msub.frequency AS subscription_frequency,
+
+msub.start_date AS subscription_start_date
 
 
 FROM members m
@@ -217,6 +229,12 @@ ON ms.id=m.status_id
 LEFT JOIN member_groups mg
 
 ON mg.id=m.group_id
+
+LEFT JOIN member_subscription msub
+
+ON msub.member_id = m.id
+
+AND msub.end_date IS NULL
 
 
 WHERE m.id=$1
@@ -349,9 +367,178 @@ RETURNING *
   return result.rows[0];
 }
 
+async function update(client, id, data) {
+  const fields = [];
+  const values = [];
+
+  if (data.first_name) {
+    fields.push(`first_name=$${values.length + 1}`);
+
+    values.push(data.first_name);
+  }
+
+  if (data.last_name) {
+    fields.push(`last_name=$${values.length + 1}`);
+
+    values.push(data.last_name);
+  }
+
+  if (data.phone) {
+    fields.push(`phone=$${values.length + 1}`);
+
+    values.push(data.phone);
+  }
+
+  if (data.email) {
+    fields.push(`email=$${values.length + 1}`);
+
+    values.push(data.email);
+  }
+
+  if (data.status_id) {
+    fields.push(`status_id=$${values.length + 1}`);
+
+    values.push(data.status_id);
+  }
+
+  if (data.group_id) {
+    fields.push(`group_id=$${values.length + 1}`);
+
+    values.push(data.group_id);
+  }
+
+  if (data.entry_date) {
+    fields.push(`entry_date=$${values.length + 1}`);
+
+    values.push(data.entry_date);
+  }
+
+  if (fields.length === 0) {
+    return null;
+  }
+
+  values.push(id);
+
+  const result = await client.query(
+    `
+
+UPDATE members
+
+SET
+
+${fields.join(",")},
+
+updated_at=CURRENT_TIMESTAMP
+
+
+WHERE id=$${values.length}
+
+
+RETURNING *
+
+`,
+
+    values,
+  );
+
+  return result.rows[0];
+}
+
+async function findActiveSubscription(client, memberId) {
+  const result = await client.query(
+    `
+
+SELECT *
+
+FROM member_subscription
+
+WHERE member_id=$1
+
+AND end_date IS NULL
+
+ORDER BY start_date DESC
+
+LIMIT 1
+
+`,
+
+    [memberId],
+  );
+
+  return result.rows[0];
+}
+
+async function closeSubscription(client, id, endDate) {
+  await client.query(
+    `
+
+UPDATE member_subscription
+
+SET
+
+end_date=$1,
+
+updated_at=CURRENT_TIMESTAMP
+
+
+WHERE id=$2
+
+`,
+
+    [endDate, id],
+  );
+}
+
+async function updateSubscription(client, id, data) {
+  const fields = [];
+  const values = [];
+
+  if (data.amount !== undefined) {
+    fields.push(`amount=$${values.length + 1}`);
+
+    values.push(data.amount);
+  }
+
+  if (data.frequency !== undefined) {
+    fields.push(`frequency=$${values.length + 1}`);
+
+    values.push(data.frequency);
+  }
+
+  values.push(id);
+
+  const result = await client.query(
+    `
+
+UPDATE member_subscription
+
+SET
+
+${fields.join(",")},
+
+updated_at=CURRENT_TIMESTAMP
+
+
+WHERE id=$${values.length}
+
+
+RETURNING *
+
+`,
+
+    values,
+  );
+
+  return result.rows[0];
+}
+
 module.exports = {
   findAll,
   findById,
   create,
+  update,
   createSubscription,
+  findActiveSubscription,
+  closeSubscription,
+  updateSubscription,
 };

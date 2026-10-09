@@ -20,7 +20,6 @@ router.get(
   controller.getOne,
 );
 
-
 router.post(
   "/",
 
@@ -29,6 +28,12 @@ router.post(
   validate,
 
   controller.create,
+);
+
+router.put(
+  "/:id",
+
+  controller.update,
 );
 
 module.exports = router;
