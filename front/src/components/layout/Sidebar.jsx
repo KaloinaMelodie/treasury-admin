@@ -15,6 +15,7 @@ import {
   Receipt,
   ChevronLeft,
   ChevronRight,
+  People
 } from "@mui/icons-material";
 
 import { NavLink } from "react-router-dom";
@@ -42,6 +43,11 @@ const menus = [
     path: "/transactions",
     icon: <Receipt />,
   },
+  {
+    label:"Membres",
+    path:"/members",
+    icon:<People/>
+},
 ];
 
 function Sidebar() {
