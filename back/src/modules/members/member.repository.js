@@ -596,6 +596,29 @@ AND is_active=true
   return result.rows[0];
 }
 
+async function findFormOptions() {
+  const [statuses, groups] = await Promise.all([
+    db.query(`
+      SELECT id, code, label
+      FROM member_statuses
+      WHERE is_active = TRUE
+      ORDER BY label
+    `),
+
+    db.query(`
+      SELECT id, name
+      FROM member_groups
+      WHERE is_active = TRUE
+      ORDER BY name
+    `),
+  ]);
+
+  return {
+    statuses: statuses.rows,
+    groups: groups.rows,
+  };
+}
+
 module.exports = {
   findAll,
   findById,
@@ -607,5 +630,6 @@ module.exports = {
   updateSubscription,
   deleteMember,
   updateStatus,
-  findStatusByCode
+  findStatusByCode,
+  findFormOptions,  
 };

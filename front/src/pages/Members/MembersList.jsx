@@ -82,15 +82,15 @@ function MembersList() {
       label: "Nom",
       sortable: true,
     },
-    
+
     {
       field: "first_name",
-      
+
       label: "Prénom",
-      
+
       sortable: true,
     },
-    
+
     {
       field: "phone",
       label: "Téléphone",
@@ -99,13 +99,13 @@ function MembersList() {
     {
       field: "group_name",
       label: "Groupe",
-      render: (row) =>  row.group.name 
+      render: (row) => row.group.name,
     },
 
     {
       field: "status_label",
       label: "Statut",
-      render: (row) =>  row.status.label
+      render: (row) => row.status.label,
     },
 
     {
@@ -141,7 +141,9 @@ function MembersList() {
       >
         <Typography variant="h4">Membres</Typography>
 
-        <Button variant="contained">Nouveau membre</Button>
+        <Button variant="contained" onClick={() => navigate("/members/new")}>
+          Nouveau membre
+        </Button>
       </Box>
 
       <MemberFilterBar

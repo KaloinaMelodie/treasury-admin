@@ -67,6 +67,15 @@ async function updateStatus(req, res) {
   });
 }
 
+async function getOptions(req, res) {
+  const result = await service.getFormOptions();
+
+  res.json({
+    success: true,
+    data: result,
+  });
+}
+
 module.exports = {
   getAll,
   getOne,
@@ -74,4 +83,5 @@ module.exports = {
   update,
   remove,
   updateStatus,
+  getOptions,
 };

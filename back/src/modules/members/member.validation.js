@@ -17,16 +17,19 @@ const createMemberValidation = [
     .withMessage("Entry date required"),
 
   body("subscription.amount")
-    .optional()
-
-    .isNumeric()
-
-    .withMessage("Amount must be numeric"),
+  .if((value, { req }) => req.body.subscription != null)
+  .isFloat({ gt: 0 })
+  .withMessage("Le montant doit être positif"),
 
   body("subscription.frequency")
-    .optional()
+  .if((value, { req }) => req.body.subscription != null)
+  .isIn(["MONTHLY", "YEARLY", "CUSTOM"])
+  .withMessage("Fréquence invalide"),
 
-    .isIn(["MONTHLY", "YEARLY", "CUSTOM"]),
+  body("subscription.start_date")
+  .if((value, { req }) => req.body.subscription != null)
+  .isISO8601({ strict: true })
+  .withMessage("Date de début invalide"),
 ];
 
 module.exports = {

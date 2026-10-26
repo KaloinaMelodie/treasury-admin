@@ -7,7 +7,17 @@ https://chatgpt.com/g/g-p-6a548a2f486c8191bd0b8818e28776c6-modestee/c/6aba1ffd-6
 
 https://chatgpt.com/g/g-p-6a548a2f486c8191bd0b8818e28776c6/shared/c/6aba1ffd-69dc-83ec-8460-91d536ab3e29
 
+Conception systeme tresorerie (pas grand chose)
 https://chatgpt.com/g/g-p-6a548a2f486c8191bd0b8818e28776c6/shared/c/6ab11ef0-28e0-83ea-ab7e-d48b095ee0fd?owner_user_id=user-YUsPKMhCfXPipUHYyRs802x4
+
+Branche - COnception systeme tresorerie 
+https://chatgpt.com/g/g-p-6a548a2f486c8191bd0b8818e28776c6/shared/c/6ac33d58-b828-83ec-a5d2-0d24fe80b9e1?owner_user_id=user-vhWtN7Pjf6dacwnfCtr1YfLb
+
+Developpement 
+https://chatgpt.com/g/g-p-6a548a2f486c8191bd0b8818e28776c6/shared/c/6ac3457c-46b8-83ec-a308-2b74c97f19f9?owner_user_id=user-vhWtN7Pjf6dacwnfCtr1YfLb
+
+Developpement a utiliser apres
+https://chatgpt.com/g/g-p-6a548a2f486c8191bd0b8818e28776c6/shared/c/6ac8e681-c880-83ec-91f5-c9556ca71ddf?owner_user_id=user-vhWtN7Pjf6dacwnfCtr1YfLb
 
 Il faut se mettre d'accord sur ce qu'on veut faire avant la realisation ok ?
 
@@ -84,6 +94,8 @@ npm install axios
 npm install @mui/material @emotion/react @emotion/styled
 
 npm install @mui/icons-material
+
+npm run dev -- --host 127.0.0.1 --port 3000
 
 # Back
 npm install --save-dev nodemon

@@ -227,6 +227,11 @@ async function changeMemberStatus(id, statusCode) {
   }
 }
 
+async function getFormOptions() {
+  return repository.findFormOptions();
+}
+
+
 module.exports = {
   getMembers,
   getMember,
@@ -234,4 +239,5 @@ module.exports = {
   updateMember,
   removeMember,
   changeMemberStatus,
+  getFormOptions,
 };

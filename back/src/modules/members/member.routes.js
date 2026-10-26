@@ -8,11 +8,15 @@ const validate = require("../../middleware/validate");
 
 const { createMemberValidation } = require("./member.validation");
 
+const asyncHandler = require("../../middleware/asyncHandler");
+
 router.get(
   "/",
-
+  
   controller.getAll,
 );
+
+router.get("/options", asyncHandler(controller.getOptions));
 
 router.get(
   "/:id",
@@ -34,6 +38,7 @@ router.put(
   "/:id",
 
   controller.update,
+
 );
 
 router.delete("/:id", controller.remove);
@@ -43,5 +48,6 @@ router.patch(
 
   controller.updateStatus,
 );
+
 
 module.exports = router;
