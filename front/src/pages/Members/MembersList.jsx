@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+
 import { Box, Button, Typography } from "@mui/material";
 
 import ResponsiveTable from "../../components/ResponsiveTable";
@@ -12,6 +14,8 @@ import { getMembers } from "../../services/memberService";
 import MemberFilterBar from "../../components/MemberFilterBar";
 
 function MembersList() {
+  const navigate = useNavigate();
+
   const [members, setMembers] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -26,6 +30,10 @@ function MembersList() {
 
   const [pagination, setPagination] = useState({});
 
+  const [sortBy, setSortBy] = useState("created_at");
+
+  const [sortOrder, setSortOrder] = useState("desc");
+
   async function loadMembers() {
     setLoading(true);
 
@@ -39,9 +47,14 @@ function MembersList() {
       status,
 
       group_id: group,
+
+      sortBy,
+
+      sortOrder,
     });
 
     setMembers(result.data.data);
+    console.log(result.data.data);
 
     setPagination(result.data.pagination);
 
@@ -49,7 +62,19 @@ function MembersList() {
   }
   useEffect(() => {
     loadMembers();
-  }, [page, search, status, group]);
+  }, [page, search, status, group, sortBy, sortOrder]);
+
+  function handleSort(field) {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+
+      setSortOrder("asc");
+    }
+
+    setPage(1);
+  }
 
   const columns = [
     {
@@ -57,7 +82,15 @@ function MembersList() {
       label: "Nom",
       sortable: true,
     },
-
+    
+    {
+      field: "first_name",
+      
+      label: "Prénom",
+      
+      sortable: true,
+    },
+    
     {
       field: "phone",
       label: "Téléphone",
@@ -66,11 +99,13 @@ function MembersList() {
     {
       field: "group_name",
       label: "Groupe",
+      render: (row) =>  row.group.name 
     },
 
     {
       field: "status_label",
       label: "Statut",
+      render: (row) =>  row.status.label
     },
 
     {
@@ -79,6 +114,14 @@ function MembersList() {
 
       render: (row) =>
         row.subscription ? `${row.subscription.amount} Ar` : "-",
+    },
+
+    {
+      field: "entry_date",
+
+      label: "Date entrée",
+
+      sortable: true,
     },
   ];
 
@@ -101,16 +144,25 @@ function MembersList() {
         <Button variant="contained">Nouveau membre</Button>
       </Box>
 
-      <MemberFilterBar 
-        search={search} 
-        setSearch={setSearch} 
-        status={status} 
-        setStatus={setStatus} 
-        group={group} 
-        setGroup={setGroup} 
+      <MemberFilterBar
+        search={search}
+        setSearch={setSearch}
+        status={status}
+        setStatus={setStatus}
+        group={group}
+        setGroup={setGroup}
       />
 
-      <ResponsiveTable columns={columns} rows={members} />
+      <ResponsiveTable
+        columns={columns}
+        rows={members}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSort={handleSort}
+        onRowClick={(member) => {
+          navigate(`/members/${member.id}`);
+        }}
+      />
 
       <TablePagination pagination={pagination} page={page} setPage={setPage} />
     </Box>

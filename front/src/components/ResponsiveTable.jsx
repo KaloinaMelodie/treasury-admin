@@ -13,7 +13,7 @@ import {
   Box,
 } from "@mui/material";
 
-function ResponsiveTable({ columns, rows, sortBy, sortOrder, onSort }) {
+function ResponsiveTable({ columns, rows, sortBy, sortOrder, onSort, onRowClick }) {
   const mobile = useMediaQuery("(max-width:900px)");
 
   if (mobile) {
@@ -56,7 +56,7 @@ function ResponsiveTable({ columns, rows, sortBy, sortOrder, onSort }) {
         <TableHead>
           <TableRow>
             {columns.map((column) => (
-              <TableCell
+              <TableCell key={column.field}
                 onClick={() => onSort(column.field)}
                 sx={{
                   cursor: "pointer",
@@ -78,7 +78,7 @@ function ResponsiveTable({ columns, rows, sortBy, sortOrder, onSort }) {
 
         <TableBody>
           {rows.map((row, index) => (
-            <TableRow key={index}>
+            <TableRow key={index} onClick={()=>onRowClick(row)}>
               {columns.map((column) => (
                 <TableCell key={column.field}>
                   {column.render ? column.render(row) : row[column.field]}
